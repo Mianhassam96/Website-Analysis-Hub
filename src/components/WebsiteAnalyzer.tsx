@@ -1,46 +1,42 @@
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import { Button } from "@/components/ui/button";
+import { WebsiteMetrics } from "./WebsiteMetrics";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { Card } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
-import { AnalyticsService } from "@/services/AnalyticsService";
-import { WebsiteMetrics } from "@/components/WebsiteMetrics";
-
-interface AnalysisResult {
-  domainAuthority: number;
-  pageAuthority: number;
-  spamScore: number;
-  backlinks: number;
-  referringDomains: number;
-  keywordRankings: number;
-}
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export const WebsiteAnalyzer = () => {
-  const { toast } = useToast();
   const [url, setUrl] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [analysisResults, setAnalysisResults] = useState<any>(null);
+  const { toast } = useToast();
 
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsAnalyzing(true);
-    setProgress(0);
-    setResult(null);
 
     try {
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setProgress((prev) => Math.min(prev + 10, 90));
-      }, 500);
+      // Simulated API call - replace with actual API integration
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Mock data - replace with actual API response
+      const mockResults = {
+        domainAuthority: 65,
+        pageAuthority: 58,
+        backlinks: 15420,
+        keywords: ["seo", "digital marketing", "web analytics", "content strategy", "sem"],
+        contactInfo: {
+          phone: "+1 (555) 123-4567",
+          email: "contact@example.com",
+          address: "123 Tech Street, Digital City, DC 12345"
+        },
+        seoMetrics: {
+          keywordRank: 12,
+          organicTraffic: 45000,
+          totalKeywords: 2840
+        }
+      };
 
-      const analysisResult = await AnalyticsService.analyzeWebsite(url);
-      clearInterval(progressInterval);
-      setProgress(100);
-      setResult(analysisResult);
-
+      setAnalysisResults(mockResults);
       toast({
         title: "Analysis Complete",
         description: "Website analysis has been completed successfully.",
@@ -48,7 +44,7 @@ export const WebsiteAnalyzer = () => {
     } catch (error) {
       toast({
         title: "Analysis Failed",
-        description: error instanceof Error ? error.message : "Failed to analyze website",
+        description: "Failed to analyze the website. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -58,32 +54,25 @@ export const WebsiteAnalyzer = () => {
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleAnalyze} className="space-y-4">
-        <div className="flex gap-4">
-          <Input
-            type="url"
-            placeholder="Enter website URL (e.g., https://example.com)"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            required
-            className="flex-1"
-          />
-          <Button type="submit" disabled={isAnalyzing}>
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
-              </>
-            ) : (
-              "Analyze"
-            )}
-          </Button>
-        </div>
-
-        {isAnalyzing && <Progress value={progress} className="w-full" />}
+      <form onSubmit={handleAnalyze} className="flex gap-4">
+        <Input
+          type="url"
+          placeholder="Enter website URL (e.g., https://example.com)"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          required
+          className="flex-grow border-[#9b87f5]/20 focus:border-[#9b87f5]"
+        />
+        <Button
+          type="submit"
+          disabled={isAnalyzing}
+          className="bg-gradient-to-r from-[#9b87f5] to-[#7E69AB] hover:opacity-90 transition-opacity"
+        >
+          {isAnalyzing ? "Analyzing..." : "Analyze"}
+        </Button>
       </form>
 
-      {result && <WebsiteMetrics metrics={result} />}
+      {analysisResults && <WebsiteMetrics url={url} metrics={analysisResults} />}
     </div>
   );
 };
