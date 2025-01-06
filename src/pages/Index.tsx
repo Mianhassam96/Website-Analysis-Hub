@@ -66,15 +66,7 @@ const Index = () => {
 
           {/* Main Analysis Tool */}
           <Card className="border-[#9b87f5]/20 shadow-xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
-            <CardHeader className="text-center">
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#7E69AB] text-transparent bg-clip-text">
-                Website Analyzer
-              </CardTitle>
-              <CardDescription className="text-lg">
-                Enter your website URL to start the analysis
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <WebsiteAnalyzer />
             </CardContent>
           </Card>
