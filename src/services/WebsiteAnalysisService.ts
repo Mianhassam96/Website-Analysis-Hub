@@ -35,12 +35,7 @@ export class WebsiteAnalysisService {
       const crawlResponse = await this.firecrawlApp.crawlUrl(url, {
         limit: 10,
         scrapeOptions: {
-          formats: ['html'],
-          selectors: [
-            { name: 'contact-email', selector: 'a[href^="mailto:"]' },
-            { name: 'contact-phone', selector: 'a[href^="tel:"]' },
-            { name: 'contact-address', selector: 'address' }
-          ]
+          formats: ['html']
         }
       });
 
