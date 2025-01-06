@@ -2,21 +2,7 @@
 
 Unlock your website's potential with our comprehensive analysis tools. Website Analysis Hub provides detailed insights into your website's performance, SEO, traffic, security, and more. It's designed for website owners, developers, and marketers who want to optimize their digital presence.
 
-## Features
 
-- **SEO Analysis**: Identify and fix on-page SEO issues to improve search engine rankings.
-- **Performance Metrics**: Analyze page speed, responsiveness, and load time to enhance user experience.
-- **Traffic Insights**: Get detailed data on website traffic, user behavior, and engagement.
-- **Security Check**: Ensure your website is secure by identifying vulnerabilities.
-- **Mobile Optimization**: Test and improve mobile responsiveness for a better user experience across devices.
-- **User-Friendly Dashboard**: View all key metrics in one intuitive, easy-to-use dashboard.
-
-## Technologies Used
-
-- **Frontend**: HTML, CSS, JavaScript, React
-- **Backend**: Node.js, Express
-- **Database**: MongoDB (or any database you're using)
-- **API Integration**: Various third-party APIs for SEO, analytics, and security checks
 
 ## Installation
 
