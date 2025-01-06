@@ -36,11 +36,11 @@ export class WebsiteAnalysisService {
         limit: 10,
         scrapeOptions: {
           formats: ['html'],
-          cssSelectors: {
-            'contact-email': 'a[href^="mailto:"]',
-            'contact-phone': 'a[href^="tel:"]',
-            'contact-address': 'address'
-          }
+          selectors: [
+            { name: 'contact-email', selector: 'a[href^="mailto:"]' },
+            { name: 'contact-phone', selector: 'a[href^="tel:"]' },
+            { name: 'contact-address', selector: 'address' }
+          ]
         }
       });
 
