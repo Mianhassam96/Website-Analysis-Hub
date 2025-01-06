@@ -36,10 +36,10 @@ export class WebsiteAnalysisService {
         limit: 10,
         scrapeOptions: {
           formats: ['html'],
-          selectors: {
-            emails: 'a[href^="mailto:"]',
-            phones: 'a[href^="tel:"]',
-            addresses: 'address'
+          cssSelectors: {
+            'contact-email': 'a[href^="mailto:"]',
+            'contact-phone': 'a[href^="tel:"]',
+            'contact-address': 'address'
           }
         }
       });
@@ -48,7 +48,8 @@ export class WebsiteAnalysisService {
         throw new Error('Failed to analyze website');
       }
 
-      const htmlContent = crawlResponse.data?.content || '';
+      // Get the HTML content from the first document
+      const htmlContent = crawlResponse.data?.[0]?.html || '';
 
       // Extract contact information using regex patterns
       const emailPattern = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
