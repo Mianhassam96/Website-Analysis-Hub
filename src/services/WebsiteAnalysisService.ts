@@ -1,4 +1,4 @@
-import { FirecrawlService } from '@/utils/FirecrawlService';
+import FirecrawlApp from '@mendable/firecrawl-js';
 
 interface WebsiteAnalysisResult {
   domainAuthority: number;
@@ -19,28 +19,41 @@ interface WebsiteAnalysisResult {
 
 export class WebsiteAnalysisService {
   private static API_KEY_STORAGE_KEY = 'firecrawl_api_key';
+  private static firecrawlApp: FirecrawlApp | null = null;
 
   static async analyzeWebsite(url: string): Promise<WebsiteAnalysisResult> {
+    const apiKey = localStorage.getItem(this.API_KEY_STORAGE_KEY);
+    if (!apiKey) {
+      throw new Error('API key not found. Please set your Firecrawl API key.');
+    }
+
+    if (!this.firecrawlApp) {
+      this.firecrawlApp = new FirecrawlApp({ apiKey });
+    }
+
     try {
-      const apiKey = localStorage.getItem(this.API_KEY_STORAGE_KEY);
-      if (!apiKey) {
-        throw new Error('API key not found. Please set your Firecrawl API key.');
+      const crawlResponse = await this.firecrawlApp.crawlUrl(url, {
+        limit: 10,
+        scrapeOptions: {
+          formats: ['html'],
+          selectors: {
+            emails: 'a[href^="mailto:"]',
+            phones: 'a[href^="tel:"]',
+            addresses: 'address'
+          }
+        }
+      });
+
+      if (!crawlResponse.success) {
+        throw new Error('Failed to analyze website');
       }
 
-      const firecrawlService = new FirecrawlService();
-      const crawlResult = await firecrawlService.crawlWebsite(url);
-
-      if (!crawlResult.success) {
-        throw new Error(crawlResult.error || 'Failed to analyze website');
-      }
+      const htmlContent = crawlResponse.data?.content || '';
 
       // Extract contact information using regex patterns
       const emailPattern = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
       const phonePattern = /(\+\d{1,3}[-.]?)?\(?\d{3}\)?[-.]?\d{3}[-.]?\d{4}/g;
       const addressPattern = /\d+\s+([a-zA-Z]+\s*)+,\s*[a-zA-Z]+,\s*[A-Z]{2}\s*\d{5}/g;
-
-      const data = crawlResult.data as any;
-      const htmlContent = data.html || '';
 
       const emails = htmlContent.match(emailPattern) || [];
       const phones = htmlContent.match(phonePattern) || [];
@@ -50,15 +63,33 @@ export class WebsiteAnalysisService {
       const keywordsMatch = htmlContent.match(/<meta\s+name="keywords"\s+content="([^"]+)"/i);
       const keywords = keywordsMatch ? 
         keywordsMatch[1].split(',').map(k => k.trim()) : 
-        ['seo', 'website'];
+        [];
 
       // Calculate metrics based on content analysis
-      const contentLength = htmlContent.length;
       const backlinksCount = (htmlContent.match(/<a\s+href="http/g) || []).length;
+      const contentLength = htmlContent.length;
+
+      // Calculate domain and page authority based on various factors
+      const domainAuthority = Math.min(
+        Math.floor((backlinksCount * 0.3 + contentLength / 1000) * 0.5),
+        100
+      );
+      const pageAuthority = Math.min(
+        Math.floor((backlinksCount * 0.2 + contentLength / 800) * 0.4),
+        100
+      );
+
+      // Calculate SEO metrics based on content analysis
+      const keywordDensity = keywords.length > 0 ? 
+        keywords.reduce((acc, keyword) => {
+          const regex = new RegExp(keyword, 'gi');
+          const matches = htmlContent.match(regex);
+          return acc + (matches ? matches.length : 0);
+        }, 0) / contentLength : 0;
 
       return {
-        domainAuthority: Math.min(Math.floor(contentLength / 1000), 100),
-        pageAuthority: Math.min(Math.floor(backlinksCount * 2), 100),
+        domainAuthority,
+        pageAuthority,
         backlinks: backlinksCount,
         keywords: keywords.slice(0, 5),
         contactInfo: {
@@ -67,9 +98,9 @@ export class WebsiteAnalysisService {
           address: addresses[0]
         },
         seoMetrics: {
-          keywordRank: Math.floor(Math.random() * 20) + 1,
-          organicTraffic: Math.floor(Math.random() * 50000) + 5000,
-          totalKeywords: Math.floor(Math.random() * 3000) + 1000
+          keywordRank: Math.max(1, Math.floor(100 - (keywordDensity * 1000))),
+          organicTraffic: Math.floor(domainAuthority * backlinksCount * 10),
+          totalKeywords: keywords.length
         }
       };
     } catch (error) {
